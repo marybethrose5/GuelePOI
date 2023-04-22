@@ -7,7 +7,6 @@ import requests
 from fastapi import FastAPI, HTTPException, Request
 from jax.experimental.compilation_cache import compilation_cache as cc
 from transformers.models.whisper.tokenization_whisper import TO_LANGUAGE_CODE
-from transformers.pipelines.audio_utils import ffmpeg_read
 
 from whisper_jax import FlaxWhisperPipline
 
@@ -42,7 +41,6 @@ def download_youtube(yt_url, max_filesize=50.0):
 
     stream.download(filename="audio.mp3")
 
-    with open("audio.mp3", "rb") as f:
         inputs = f.read()
 
     inputs = ffmpeg_read(inputs, pipeline.feature_extractor.sampling_rate)
@@ -90,7 +88,6 @@ def check_inputs(inputs, language, task, return_timestamps):
                 status_code=418, detail=f"We expect a numpy ndarray as input, got {type(inputs['array'])}"
             )
 
-        if len(inputs["array"].shape) != 1:
             raise HTTPException(
                 status_code=418,
                 detail=f"We expect a single channel audio input for the Flax Whisper API, got {len(inputs['array'].shape)} channels.",
@@ -139,7 +136,6 @@ def check_inputs(inputs, language, task, return_timestamps):
     if return_timestamps is not None:
         if not isinstance(return_timestamps, bool):
             raise HTTPException(
-                status_code=418,
                 detail=(
                     f"return_timestamps should be a boolean value of either 'True' or 'False', got {return_timestamps}"
                 ),
@@ -162,7 +158,6 @@ async def generate(request: Request):
         inputs,
         language=language,
         task=task,
-        return_timestamps=return_timestamps,
         batch_size=batch_size,
         chunk_length_s=chunk_length_s,
     )
